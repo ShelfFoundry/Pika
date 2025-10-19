@@ -5,7 +5,8 @@ CFLAGS := -std=c17 -O3 -Wall -Wextra -Wswitch-enum -fno-builtin -I$(INC) -I$(SRC
 WASMFLAGS := --target=wasm32 -nostdlib
 LDFLAGS := -Wl,--no-entry -Wl,--allow-undefined
 
-OBJS := $(OBJ)/main.o $(OBJ)/heap.o
+SRCS := $(wildcard $(SRC)/*.c)
+OBJS := $(patsubst $(SRC)/%.c,$(OBJ)/%.o,$(SRCS))
 DEPS := $(OBJS:.o=.d)
 
 all: $(OBJ)/app.wasm
