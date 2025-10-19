@@ -2,9 +2,7 @@
 #include "heap.h"
 #include "assert.h"
 
-// TODO: remove
-static f32 bg_color_flip_timer = 5.0;
-static u32 bg_color = 0xFFFF0000;
+static u32 bg_color = 0xFF181818;
 
 struct framebuffer {
     u8 *buffer;
@@ -115,26 +113,6 @@ WASM_EXPORT(update)
 void update(f32 dt)
 {
     display.dirty = 0;
-
-    bg_color_flip_timer -= dt;
-
-    if (bg_color_flip_timer <= 0)
-    {
-        if (bg_color == 0xFFFF0000)
-        {
-            bg_color = 0xFF00FF00;
-        }
-        else if (bg_color == 0xFF00FF00)
-        {
-            bg_color = 0xFF0000FF;
-        }
-        else if (bg_color == 0xFF0000FF)
-        {
-            bg_color = 0xFFFF0000;
-        }
-        display.dirty = 1;
-        bg_color_flip_timer = 5.0;
-    }
 }
 
 #ifdef PLATFORM_NATIVE
