@@ -24,3 +24,8 @@ clean:
 	rm -rf $(OBJ)
 
 -include $(DEPS)
+
+.PHONY: compdb
+compdb:
+	rm -f compile_commands.json
+	bear -- make -B
