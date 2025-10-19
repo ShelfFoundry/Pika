@@ -6,9 +6,11 @@
 - [Bear (compile_commands.json)](https://github.com/rizsotto/Bear) (for LSP, optional)
 - [Python 3](https://www.python.org/) (for local static server, optional)
 
-> macOS: `brew install llvm bear`
-> Ubuntu/Debian: `sudo apt-get install clang make bear python3`
-> Arch (btw): `sudo pacman -S clang make bear python3`
+**Install commands**:
+
+- macOS: `brew install llvm bear`
+- Ubuntu/Debian: `sudo apt-get install clang make bear python3`
+- Arch (btw): `sudo pacman -S clang make bear python3`
 
 ## Layout
 
