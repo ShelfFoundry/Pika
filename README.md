@@ -15,16 +15,22 @@
 ## Layout
 
 ```bash
-/include/   # public headers (e.g., base.h, heap.h)
-/src/       # .c files (e.g., main.c, heap.c)
-/build/     # artifacts (generated)
+/include/           # public headers (e.g., base.h, heap.h)
+/src/               # .c files (e.g., main.c, heap.c)
+/build/             # artifacts (generated)
 Makefile
+index.html
+main.js
+main.css
+renderer.js         # WebGL2 render pipeline
+shader-program.js   # WebGL2 shader program utility
+frame-view.js       # DataView for framebuffer
 ```
 
 ## Build (WASM)
 
 ```bash
-make        # -> build/app.wasm
+make                # -> build/app.wasm
 make clean
 ```
 
