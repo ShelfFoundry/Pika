@@ -1,9 +1,25 @@
-all: wasm
+SRC := src
+INC := include
+OBJ := build
+CFLAGS := -std=c17 -O3 -Wall -Wextra -Wswitch-enum -fno-builtin -I$(INC) -I$(SRC) -DPLATFORM_WEB -MMD -MP
+WASMFLAGS := --target=wasm32 -nostdlib
+LDFLAGS := -Wl,--no-entry -Wl,--allow-undefined
 
-wasm: ./src/main.c
-	clang -Wall -Wextra -Wswitch-enum -O3 -fno-builtin --target=wasm32 --no-standard-libraries \
-		-Wl,--no-entry -Wl,--allow-undefined \
-		-o main.wasm ./src/main.c -DPLATFORM_WEB
+OBJS := $(OBJ)/main.o $(OBJ)/heap.o
+DEPS := $(OBJS:.o=.d)
 
-native: ./src/main.c
-	clang -o main ./src/main.c -lm -DPLATFORM_NATIVE
+all: $(OBJ)/app.wasm
+
+$(OBJ)/app.wasm: $(OBJS)
+	clang $(WASMFLAGS) $^ -o $@ $(LDFLAGS)
+
+$(OBJ)/%.o: $(SRC)/%.c | $(OBJ)
+	clang $(CFLAGS) $(WASMFLAGS) -c $< -o $@
+
+$(OBJ):
+	mkdir -p $(OBJ)
+
+clean:
+	rm -rf $(OBJ)
+
+-include $(DEPS)

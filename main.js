@@ -28,7 +28,7 @@ document.addEventListener("visibilitychange", ()=>{
     if (!doUpdate) skipNextUpdate = true;
 });
 
-WebAssembly.instantiateStreaming(fetch("main.wasm"), {
+WebAssembly.instantiateStreaming(fetch("/build/app.wasm"), {
     env: make_env({
         memory_grow: (pages) => wasm.instance.exports.memory.grow(pages),
         wasm_memory_size_pages: () => wasm.instance.exports.memory.buffer.byteLength / 65536,

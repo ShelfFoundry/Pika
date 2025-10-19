@@ -1,5 +1,5 @@
 main
-main.wasm
+app.wasm
 
 # Prerequisites
 *.d
