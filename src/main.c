@@ -1,114 +1,9 @@
 #include "base.h"
 #include "heap.h"
 #include "assert.h"
+#include "ecs_registry.h"
 #include <stddef.h>
 #include <stdint.h>
-#include <stdalign.h>
-
-#define INVALID_U32 0xFFFFFFFF
-#define IDX_BITS 20
-#define GEN_BITS 12
-#define IDX_MASK (1u<<IDX_BITS)-1
-#define GEN_MASK (1u<<GEN_BITS)-1
-#define GEN_SHIFT IDX_BITS
-#define NULL_HANDLE 0u
-
-struct entity {
-    u16 gen;
-    flags32 mask;
-};
-
-struct entity_registry {
-    u32 capacity;
-    u32 free_head;
-    u8 *next_free;
-    u8 *slots;
-};
-
-static inline handle_t handle_pack(u32 idx, u16 gen)
-{
-    // NOTE: (idx & IDX_MASK): keep only low 20 bits
-    // ((u32)gen & GEN_MASK) << GEN_SHIFT: place gen in upper 12 bits
-    assert(idx <= IDX_MASK);
-    assert((gen & ~GEN_MASK) == 0);
-    return (idx & IDX_MASK) | (((u32)gen & GEN_MASK) << GEN_SHIFT);
-}
-
-static inline u32 handle_idx(handle_t handle)
-{
-    return handle & IDX_MASK;
-}
-
-static inline u16 handle_gen(handle_t handle)
-{
-    return (u16)(handle >> GEN_SHIFT) & GEN_MASK;
-}
-
-void registry_init(struct entity_registry *r, u32 initial_capacity)
-{
-    r->capacity = initial_capacity;
-    size_t slot_bytes = sizeof(struct entity) * initial_capacity;
-    u8* slots_arr = heap_alloc(slot_bytes, alignof(struct entity));
-    if (!slots_arr) return out_of_memory();
-    r->slots = slots_arr;
-    size_t next_bytes = sizeof(u32) * initial_capacity;
-    u8* next_arr = heap_alloc(next_bytes, alignof(u32));
-    if (!next_arr) return out_of_memory();
-    r->next_free = next_arr;
-
-    u32 *next = (u32*)r->next_free;
-    for (u32 i = 0; i < initial_capacity - 1; i++)
-    {
-        next[i] = i + 1;
-    }
-    next[initial_capacity - 1] = INVALID_U32;
-    r->free_head = 0;
-
-    struct entity *slots = (struct entity*)r->slots;
-    for (u32 i = 0; i < initial_capacity; i++)
-    {
-        slots[i].gen = 1;
-        slots[i].mask = 0;
-    }
-
-    console_log();
-}
-
-handle_t registry_create_entity(struct entity_registry *r)
-{
-    // TODO: refactor to automatically grow when exhausted
-    assert(r->free_head != INVALID_U32 && "Entity pool exhausted");
-    struct entity *slots = (struct entity*)r->slots;
-    u32 idx = r->free_head;
-    assert(slots[idx].gen != 0);
-    assert(slots[idx].mask == 0);
-    u32 *next = (u32*)r->next_free;
-    r->free_head = next[idx];
-    handle_t handle = handle_pack(idx, slots[idx].gen);
-    assert(handle != NULL_HANDLE);
-    return handle;
-}
-
-void registry_destroy_entity(struct entity_registry *r, u32 handle)
-{
-    u32 idx = handle_idx(handle);
-    assert(idx < r->capacity);
-    u16 gen = handle_gen(handle);
-
-    struct entity *slots = (struct entity*)r->slots;
-    if (slots[idx].gen != gen) return; // NOTE: stale handle noop
-
-    //flags32 m = slots[idx].mask;
-    // TODO: destroy components based on mask before reset
-    slots[idx].mask = 0;
-
-    slots[idx].gen++;
-    if (slots[idx].gen == 0) return; // NOTE: tombstoned
-
-    u32 *next = (u32*)r->next_free;
-    next[idx] = r->free_head;
-    r->free_head = idx;
-}
 
 static u32 bg_color = 0xFF181818;
 
@@ -135,7 +30,7 @@ struct frame {
 };
 
 static struct {
-    struct entity_registry registry;
+    struct entity_registry *registry;
     struct framebuffer display;
     struct frame frame;
 } engine = {0};
@@ -155,7 +50,7 @@ WASM_EXPORT(engine_init)
 void engine_init()
 {
     heap_init();
-    registry_init(&engine.registry, 1024);
+    engine.registry = registry_create(1024);
     engine.display.align = 64;
     engine.frame.bpp = 4;
     engine.frame.version = 0;

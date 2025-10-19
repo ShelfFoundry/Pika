@@ -14,7 +14,6 @@ typedef float f32;
 typedef uint8_t u8;
 typedef int8_t i8;
 typedef uint32_t b32;
-typedef uint32_t handle_t;
 
 #ifdef PLATFORM_WEB
   #define WASM_EXPORT(name) __attribute__((export_name(#name))) __attribute__((used))
