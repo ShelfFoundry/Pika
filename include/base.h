@@ -15,6 +15,8 @@ typedef uint8_t u8;
 typedef int8_t i8;
 typedef uint32_t b32;
 
+typedef u32 handle_t; // NOTE: 32-bit packed (idx:20 | gen:12)
+
 #ifdef PLATFORM_WEB
   #define WASM_EXPORT(name) __attribute__((export_name(#name))) __attribute__((used))
 #else
@@ -30,5 +32,8 @@ extern void console_log(void);
 
 enum { BYTES_PER_PIXEL = 4 }; // RGBA
 enum { PAGE_SIZE = 65536 };
+enum { STEP = 128 };
+enum { INCH = 1 * STEP };
+enum { FOOT = 1 * 12 * STEP };
 
 #endif

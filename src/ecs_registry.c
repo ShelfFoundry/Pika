@@ -68,23 +68,25 @@ handle_t registry_create_entity(struct entity_registry *r)
     return handle;
 }
 
-void registry_destroy_entity(struct entity_registry *r, u32 handle)
+u16 registry_destroy_entity(struct entity_registry *r, u32 handle)
 {
     u32 idx = handle_idx(handle);
     assert(idx < r->capacity);
     u16 gen = handle_gen(handle);
 
     struct entity *slots = (struct entity*)r->slots;
-    if (slots[idx].gen != gen) return; // NOTE: stale handle noop
+    if (slots[idx].gen != gen) return 0; // NOTE: stale handle noop
 
     //flags32 m = slots[idx].mask;
     // TODO: destroy components based on mask before reset
     slots[idx].mask = 0;
 
     slots[idx].gen++;
-    if (slots[idx].gen == 0) return; // NOTE: tombstoned
+    if (slots[idx].gen == 0) return 0; // NOTE: tombstoned
 
     u32 *next = (u32*)r->next_free;
     next[idx] = r->free_head;
     r->free_head = idx;
+
+    return slots[idx].gen;
 }

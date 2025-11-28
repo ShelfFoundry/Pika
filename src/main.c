@@ -2,6 +2,7 @@
 #include "heap.h"
 #include "assert.h"
 #include "ecs_registry.h"
+#include "transform_pool.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -31,6 +32,7 @@ struct frame {
 
 static struct {
     struct entity_registry *registry;
+    struct transform_pool *transforms;
     struct framebuffer display;
     struct frame frame;
 } engine = {0};
@@ -46,11 +48,18 @@ static inline u8* pixel_ptr(const struct framebuffer* d, size_t x, size_t y)
     return d->buffer + y * d->stride + x * BYTES_PER_PIXEL;
 }
 
+void engine_destroy_entity(handle_t handle)
+{
+    u16 new_gen = registry_destroy_entity(engine.registry, handle);
+    destroy_transform(engine.transforms, handle, new_gen);
+}
+
 WASM_EXPORT(engine_init)
 void engine_init()
 {
     heap_init();
     engine.registry = registry_create(1024);
+    engine.transforms = transform_pool_create(1024);
     engine.display.align = 64;
     engine.frame.bpp = 4;
     engine.frame.version = 0;

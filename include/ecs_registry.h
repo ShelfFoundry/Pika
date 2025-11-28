@@ -3,8 +3,6 @@
 
 #include "base.h"
 
-typedef u32 handle_t; // NOTE: 32-bit packed (idx:20 | gen:12)
-
 enum { IDX_BITS = 20, GEN_BITS = 12 };
 enum { IDX_MASK = ((1u << IDX_BITS) - 1u),
        GEN_MASK = ((1u << GEN_BITS) - 1u),
@@ -24,6 +22,6 @@ struct entity_registry;
 
 struct entity_registry* registry_create(u32 initial_capacity);
 handle_t registry_create_entity(struct entity_registry *r);
-void registry_destroy_entity(struct entity_registry *r, u32 handle);
+u16 registry_destroy_entity(struct entity_registry *r, u32 handle);
 
 #endif
