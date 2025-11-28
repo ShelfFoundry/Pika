@@ -21,7 +21,7 @@ static inline u16 handle_gen(handle_t handle){ return (u16)(handle >> GEN_SHIFT)
 struct entity_registry;
 
 struct entity_registry* registry_create(u32 initial_capacity);
-handle_t registry_create_entity(struct entity_registry *r);
-u16 registry_destroy_entity(struct entity_registry *r, u32 handle);
+handle_t registry_alloc(struct entity_registry *r);
+u16 registry_free(struct entity_registry *r, u32 handle);
 
 #endif

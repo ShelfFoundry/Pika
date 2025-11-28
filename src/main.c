@@ -50,8 +50,8 @@ static inline u8* pixel_ptr(const struct framebuffer* d, size_t x, size_t y)
 
 void engine_destroy_entity(handle_t handle)
 {
-    u16 new_gen = registry_destroy_entity(engine.registry, handle);
-    destroy_transform(engine.transforms, handle, new_gen);
+    u16 new_gen = registry_free(engine.registry, handle);
+    transform_reset(engine.transforms, handle, new_gen);
 }
 
 WASM_EXPORT(engine_init)

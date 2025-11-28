@@ -53,7 +53,7 @@ struct entity_registry* registry_create(u32 initial_capacity)
     return r;
 }
 
-handle_t registry_create_entity(struct entity_registry *r)
+handle_t registry_alloc(struct entity_registry *r)
 {
     // TODO: refactor to automatically grow when exhausted
     assert(r->free_head != INVALID_U32 && "Entity pool exhausted");
@@ -68,7 +68,7 @@ handle_t registry_create_entity(struct entity_registry *r)
     return handle;
 }
 
-u16 registry_destroy_entity(struct entity_registry *r, u32 handle)
+u16 registry_free(struct entity_registry *r, u32 handle)
 {
     u32 idx = handle_idx(handle);
     assert(idx < r->capacity);
