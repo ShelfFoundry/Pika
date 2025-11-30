@@ -35,5 +35,6 @@ enum { PAGE_SIZE = 65536 };
 enum { STEP = 128 };
 enum { INCH = 1 * STEP };
 enum { FOOT = 1 * 12 * STEP };
+enum { MAX_ENTITIES_FOR_SPARSE = UINT16_MAX };
 
 #endif
