@@ -62,3 +62,53 @@ struct fixture_pool* fixture_pool_create(u32 initial_capacity)
     return p;
 }
 
+struct fixture* fixture_alloc(struct fixture_pool *p, handle_t handle)
+{
+    u32 entity_idx = handle_idx(handle);
+    u32 dense_idx = p->count;
+    assert(dense_idx < p->capacity); // TODO: handle growing array
+    p->count++;
+    u32 *dense = (u32*)p->dense_to_entity;
+    dense[dense_idx] = entity_idx;
+    u16 *sparse = (u16*)p->sparse_from_entity;
+    assert(sparse[entity_idx] == 0);
+    sparse[entity_idx] = dense_idx + 1;
+
+    u16 gen = handle_gen(handle);
+    u16 *gen_arr = (u16*)p->gens;
+    gen_arr[dense_idx] = gen;
+
+    struct fixture *slots = (struct fixture*)p->slots;
+    return &slots[dense_idx];
+}
+
+void fixture_free(struct fixture_pool *p, handle_t handle)
+{
+    u32 entity_idx = handle_idx(handle);
+    u16 *sparse = (u16*)p->sparse_from_entity;
+    u32 *dense = (u32*)p->dense_to_entity;
+
+    u16 stored = sparse[entity_idx];
+    if (stored == 0) return; // NOTE: not a fixture noop
+
+    u32 dead_dense_idx = stored - 1;
+    u16 gen = handle_gen(handle);
+
+    u16 *gen_arr = (u16*)p->gens;
+    if (gen_arr[dead_dense_idx] != gen) return; // NOTE: stale handle noop
+
+    struct fixture *slots = (struct fixture*)p->slots;
+    // TODO: reset fields
+
+    u32 last_dense_idx = p->count - 1;
+    if (dead_dense_idx != last_dense_idx)
+    {
+        slots[dead_dense_idx] = slots[last_dense_idx];
+        gen_arr[dead_dense_idx] = gen_arr[last_dense_idx];
+        u32 moved_entity_idx = dense[last_dense_idx];
+        sparse[moved_entity_idx] = dead_dense_idx + 1;
+        dense[dead_dense_idx] = dense[last_dense_idx];
+    }
+    sparse[entity_idx] = 0;
+    p->count--;
+}
