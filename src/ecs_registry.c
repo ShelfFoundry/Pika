@@ -42,8 +42,6 @@ void registry_init(struct entity_registry *r, u32 initial_capacity)
         slots[i].gen = 1;
         slots[i].mask = 0;
     }
-
-    console_log();
 }
 
 struct entity_registry* registry_create(u32 initial_capacity)

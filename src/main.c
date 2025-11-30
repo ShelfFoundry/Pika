@@ -3,6 +3,7 @@
 #include "assert.h"
 #include "ecs_registry.h"
 #include "transform_pool.h"
+#include "fixture_pool.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -33,6 +34,7 @@ struct frame {
 static struct {
     struct entity_registry *registry;
     struct transform_pool *transforms;
+    struct fixture_pool *fixtures;
     struct framebuffer display;
     struct frame frame;
 } engine = {0};
@@ -60,6 +62,7 @@ void engine_init()
     heap_init();
     engine.registry = registry_create(1024);
     engine.transforms = transform_pool_create(1024);
+    engine.fixtures = fixture_pool_create(256);
     engine.display.align = 64;
     engine.frame.bpp = 4;
     engine.frame.version = 0;
