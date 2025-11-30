@@ -3,6 +3,7 @@
 #include "assert.h"
 #include "ecs_registry.h"
 #include <stdalign.h>
+#include <stdint.h>
 
 struct fixture {
     u32 foo;
@@ -16,6 +17,7 @@ struct fixture_pool {
     u8 *gens;
     u32 free_head;
     u8 *next_free;
+    u8 *sparse_from_entity;
 };
 
 void fixture_pool_init(struct fixture_pool *p, u32 initial_capacity)
@@ -46,6 +48,16 @@ void fixture_pool_init(struct fixture_pool *p, u32 initial_capacity)
     for (u32 i = 0; i < initial_capacity; i++)
     {
         gen[i] = 1;
+    }
+
+    size_t sparse_bytes = sizeof(u16) * UINT16_MAX;
+    u8* sparse_arr = heap_alloc(sparse_bytes, alignof(u16));
+    if (!sparse_arr) return out_of_memory();
+    p->sparse_from_entity = sparse_arr;
+    u16 *sparse = (u16*)p->sparse_from_entity;
+    for (u32 i = 0; i < UINT16_MAX; i++)
+    {
+        sparse[i] = 0;
     }
 }
 
