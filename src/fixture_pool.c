@@ -13,10 +13,10 @@ struct fixture {
 
 struct fixture_pool {
     u32 capacity;
+    u32 count;
     u8 *slots;
     u8 *gens;
-    u32 free_head;
-    u8 *next_free;
+    u8 *dense_to_entity;
     u8 *sparse_from_entity;
 };
 
@@ -28,17 +28,11 @@ void fixture_pool_init(struct fixture_pool *p, u32 initial_capacity)
     if (!slots_arr) return out_of_memory();
     p->slots = slots_arr;
 
-    size_t next_bytes = sizeof(u32) * initial_capacity;
-    u8* next_arr = heap_alloc(next_bytes, alignof(u32));
-    if (!next_arr) return out_of_memory();
-    p->next_free = next_arr;
-    u32 *next = (u32*)p->next_free;
-    for (u32 i = 0; i < initial_capacity - 1; i++)
-    {
-        next[i] = i + 1;
-    }
-    next[initial_capacity - 1] = INVALID_U32;
-    p->free_head = 0;
+    size_t dense_bytes = sizeof(u32) * initial_capacity;
+    u8* dense_arr = heap_alloc(dense_bytes, alignof(u32));
+    if (!dense_arr) return out_of_memory();
+    p->dense_to_entity = dense_arr;
+    p->count = 0;
 
     size_t gen_bytes = sizeof(u16) * initial_capacity;
     u8* gen_arr = heap_alloc(gen_bytes, alignof(u16));
