@@ -70,7 +70,7 @@ struct fixture_pool* fixture_pool_create(u32 initial_capacity)
     return p;
 }
 
-struct fixture* fixture_alloc(struct fixture_pool *p, handle_t handle)
+handle_t fixture_alloc(struct fixture_pool *p, handle_t handle)
 {
     u32 entity_idx = handle_idx(handle);
     assert(entity_idx < MAX_ENTITIES_FOR_SPARSE);
@@ -87,8 +87,7 @@ struct fixture* fixture_alloc(struct fixture_pool *p, handle_t handle)
     u16 *gen_arr = (u16*)p->gens;
     gen_arr[dense_idx] = gen;
 
-    struct fixture *slots = (struct fixture*)p->slots;
-    return &slots[dense_idx];
+    return handle;
 }
 
 void fixture_free(struct fixture_pool *p, handle_t handle)

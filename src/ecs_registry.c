@@ -40,7 +40,7 @@ void registry_init(struct entity_registry *r, u32 initial_capacity)
     for (u32 i = 0; i < initial_capacity; i++)
     {
         slots[i].gen = 1;
-        slots[i].mask = 0;
+        slots[i].mask = COMPONENT_TRANSFORM;
     }
 }
 
@@ -75,10 +75,7 @@ u16 registry_free(struct entity_registry *r, u32 handle)
     struct entity *slots = (struct entity*)r->slots;
     if (slots[idx].gen != gen) return 0; // NOTE: stale handle noop
 
-    //flags32 m = slots[idx].mask;
-    // TODO: destroy components based on mask before reset
-    slots[idx].mask = 0;
-
+    slots[idx].mask = COMPONENT_TRANSFORM;
     slots[idx].gen++;
     if (slots[idx].gen == 0) return 0; // NOTE: tombstoned
 
@@ -87,4 +84,31 @@ u16 registry_free(struct entity_registry *r, u32 handle)
     r->free_head = idx;
 
     return slots[idx].gen;
+}
+
+struct entity* entity_ptr(struct entity_registry *r, handle_t handle)
+{
+    u32 idx = handle_idx(handle);
+    assert(idx < r->capacity);
+    u16 gen = handle_gen(handle);
+
+    struct entity *slots = (struct entity*)r->slots;
+    if (gen != slots[idx].gen) return NULL; // NOTE: stale handle noop
+    return &slots[idx];
+}
+
+handle_t entity_attach_fixture(struct entity_registry *r, handle_t handle)
+{
+    struct entity* entity = entity_ptr(r, handle);
+    assert(entity);
+    entity->mask |= COMPONENT_FIXTURE;
+    return handle;
+}
+
+handle_t entity_detach_fixture(struct entity_registry *r, handle_t handle)
+{
+    struct entity* entity = entity_ptr(r, handle);
+    assert(entity);
+    entity->mask &= ~COMPONENT_FIXTURE;
+    return handle;
 }

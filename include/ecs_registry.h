@@ -8,6 +8,13 @@ enum { IDX_MASK = ((1u << IDX_BITS) - 1u),
        GEN_MASK = ((1u << GEN_BITS) - 1u),
        GEN_SHIFT = IDX_BITS };
 enum { NULL_HANDLE = 0u, INVALID_U32 = 0xFFFFFFFFu };
+enum {
+    COMPONENT_TRANSFORM = 1u << 0,
+    COMPONENT_FIXTURE   = 1u << 1,
+    COMPONENT_POSITION  = 1u << 2,
+    COMPONENT_PRODUCT   = 1u << 3,
+};
+
 
 static inline handle_t handle_pack(u32 idx, u16 gen)
 {
@@ -23,5 +30,8 @@ struct entity_registry;
 struct entity_registry* registry_create(u32 initial_capacity);
 handle_t registry_alloc(struct entity_registry *r);
 u16 registry_free(struct entity_registry *r, u32 handle);
+
+handle_t entity_attach_fixture(struct entity_registry *r, handle_t handle);
+handle_t entity_detach_fixture(struct entity_registry *r, handle_t handle);
 
 #endif

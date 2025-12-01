@@ -50,6 +50,15 @@ static inline u8* pixel_ptr(const struct framebuffer* d, size_t x, size_t y)
     return d->buffer + y * d->stride + x * BYTES_PER_PIXEL;
 }
 
+WASM_EXPORT(engine_create_fixture)
+handle_t engine_create_fixture()
+{
+    handle_t h = registry_alloc(engine.registry);
+    fixture_alloc(engine.fixtures, h);
+    entity_attach_fixture(engine.registry, h);
+    return h;
+}
+
 void engine_destroy_entity(handle_t handle)
 {
     u16 new_gen = registry_free(engine.registry, handle);
