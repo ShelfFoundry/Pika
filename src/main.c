@@ -56,6 +56,7 @@ handle_t engine_create_fixture()
     handle_t h = registry_alloc(engine.registry);
     fixture_alloc(engine.fixtures, h);
     entity_attach_fixture(engine.registry, h);
+    engine.display.dirty = 1;
     return h;
 }
 
@@ -118,7 +119,7 @@ void set_display_size(u32 width, u32 height)
 WASM_EXPORT(render)
 void render()
 {
-    if (engine.display.dirty || engine.display.needs_repaint)
+    if (engine.display.needs_repaint)
     {
         // NOTE: backfill canvas with grey
         for (u32 y = 0; y < engine.display.height_px; y++) {
@@ -140,7 +141,12 @@ void render()
 WASM_EXPORT(update)
 void update(f32 dt)
 {
-    engine.display.dirty = 0;
+    if (engine.display.dirty)
+    {
+        // TODO: rebuild render cache
+        engine.display.needs_repaint = 1;
+        engine.display.dirty = 0;
+    }
 }
 
 #ifdef PLATFORM_NATIVE
@@ -150,3 +156,4 @@ int main(void)
     return 0;
 }
 #endif
+
