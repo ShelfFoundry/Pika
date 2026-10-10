@@ -1,10 +1,3 @@
-# Pika Planogram Engine
-
-A web-based planogram editor for the OPLN open planogram format.
-
-> [!WARNING]
-> Pika is a _very_ early stage project currently focused on exploring software rendering in C + WASM.
-
 ## Prereqs
 - [Clang/LLVM (wasm32)](https://llvm.org)
 - [GNU Make](https://www.gnu.org/software/make/)
